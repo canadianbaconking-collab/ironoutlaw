@@ -39,6 +39,9 @@ public class DistrictRunScreen extends ScreenAdapter {
         }
     }
 
+    private static final float TOAST_DURATION = 4.0f;     // ~2x previous 2.5s
+    private static final float TOAST_GAP = 1.5f;          // ~+50% spacing feel (explicit enforced gap)
+
     private final GameRoot gameRoot;
     private final RunConfig runConfig;
     private final RunState runState;
@@ -68,10 +71,13 @@ public class DistrictRunScreen extends ScreenAdapter {
     private ModelInstance vehicleInstance;
     private ModelInstance roadInstance;
 
-    private boolean toast1;
-    private boolean toast2;
-    private boolean toast3;
-    private boolean toast4;
+    // Toast state flags
+    private boolean toastMoveShown;
+    private boolean toastActionsShown;
+    private boolean toastSmashShown;
+    private boolean toastSpeedShown;
+    private boolean toastChainShown;
+
     private boolean routedToResults;
     private float elapsedTime;
 
@@ -115,6 +121,9 @@ public class DistrictRunScreen extends ScreenAdapter {
             smashables.add(new SmashableRender(smashable, instance));
             smashableState.add(smashable);
         }
+
+        // Toast tuning
+        toastQueue.setGapSeconds(TOAST_GAP);
     }
 
     @Override
@@ -142,6 +151,7 @@ public class DistrictRunScreen extends ScreenAdapter {
     private void tick(float dt) {
         pollInput();
         vehicleController.update(vehicle, inputState, dt);
+
         if (inputState.jumpPressed) {
             runState.jumpedOnce = true;
         }
@@ -153,6 +163,7 @@ public class DistrictRunScreen extends ScreenAdapter {
         if (impactResult.destroyedCount > 0) {
             audioBus.playExplosion(impactResult.destroyedCount);
         }
+
         runState.score += impactResult.scoreDelta;
         runState.destroyedCount += impactResult.destroyedCount;
         removeDestroyed();
@@ -162,6 +173,7 @@ public class DistrictRunScreen extends ScreenAdapter {
 
         runState.timeRemaining -= dt;
         elapsedTime += dt;
+
         updateToasts(dt);
 
         if (runState.isEnded() && !routedToResults) {
@@ -222,22 +234,38 @@ public class DistrictRunScreen extends ScreenAdapter {
     }
 
     private void updateToasts(float dt) {
-        if (!toast1 && elapsedTime >= 1.5f) {
-            toast1 = true;
-            toastQueue.enqueue("SMASH TO MOVE", 2.5f);
+        // NEW SEQUENCE:
+        // 1) WASD/ARROWS — MOVE
+        // 2) SHIFT — NITRO   SPACE — JUMP
+        // 3) SMASH TO SCORE
+        // 4) SPEED = POWER
+        // 5) CHAIN THE DAMAGE
+
+        if (!toastMoveShown && elapsedTime >= 1.5f) {
+            toastMoveShown = true;
+            toastQueue.enqueue("WASD / ARROWS — MOVE", TOAST_DURATION);
         }
-        if (!toast2 && (runState.score >= 60 || elapsedTime >= 8f)) {
-            toast2 = true;
-            toastQueue.enqueue("SPEED = POWER", 2.5f);
+
+        if (!toastActionsShown && elapsedTime >= 7.0f) {
+            toastActionsShown = true;
+            toastQueue.enqueue("SHIFT — NITRO   SPACE — JUMP", TOAST_DURATION);
         }
-        if (!toast3 && (runState.jumpedOnce || elapsedTime >= 20f)) {
-            toast3 = true;
-            toastQueue.enqueue("AIR BREAKS HARDER", 2.5f);
+
+        if (!toastSmashShown && (runState.score >= 10 || elapsedTime >= 14.0f)) {
+            toastSmashShown = true;
+            toastQueue.enqueue("SMASH TO SCORE", TOAST_DURATION);
         }
-        if (!toast4 && (runState.destroyedCount >= 3 || elapsedTime >= 35f)) {
-            toast4 = true;
-            toastQueue.enqueue("CHAIN THE DAMAGE", 2.5f);
+
+        if (!toastSpeedShown && (runState.score >= 80 || elapsedTime >= 22.0f)) {
+            toastSpeedShown = true;
+            toastQueue.enqueue("SPEED = POWER", TOAST_DURATION);
         }
+
+        if (!toastChainShown && (runState.destroyedCount >= 3 || elapsedTime >= 32.0f)) {
+            toastChainShown = true;
+            toastQueue.enqueue("CHAIN THE DAMAGE", TOAST_DURATION);
+        }
+
         toastQueue.update(dt);
     }
 
