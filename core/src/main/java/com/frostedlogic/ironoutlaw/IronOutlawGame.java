@@ -1,11 +1,11 @@
 package com.frostedlogic.ironoutlaw;
 
-import com.badlogic.gdx.Game;
+import com.frostedlogic.ironoutlaw.gameplay.GameRoot;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class IronOutlawGame extends Game {
-    @Override
-    public void create() {
-        setScreen(new FirstScreen());
-    }
+/**
+ * Stable identity class for the game. Keep this minimal.
+ * GameRoot owns routing; launchers instantiate IronOutlawGame.
+ */
+public class IronOutlawGame extends GameRoot {
+    // Intentionally empty.
 }
