@@ -1,0 +1,5 @@
+{
+  "deterministic": true,
+  "fixedTimeStep": 0.0166667,
+  "seedableWorldGeneration": true
+}
