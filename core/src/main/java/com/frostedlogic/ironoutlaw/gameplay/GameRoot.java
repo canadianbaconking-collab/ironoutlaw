@@ -1,7 +1,6 @@
 package com.frostedlogic.ironoutlaw.gameplay;
 
 import com.badlogic.gdx.Game;
-import com.frostedlogic.ironoutlaw.FirstScreen;
 
 /**
  * GameRoot is the stable, minimal glue layer that owns screen routing.
@@ -11,7 +10,18 @@ public class GameRoot extends Game {
 
     @Override
     public void create() {
-        // Temporary: route to the existing screen. We'll replace this with IronOutlaw screens.
-        setScreen(new FirstScreen());
+        setScreen(new BootScreen(this));
+    }
+
+    public void startRun(RunConfig runConfig) {
+        setScreen(new DistrictRunScreen(this, runConfig));
+    }
+
+    public void showResults(int score, RunConfig runConfig) {
+        setScreen(new ResultsScreen(this, score, runConfig));
+    }
+
+    public void showOverworld() {
+        setScreen(new OverworldScreen(this));
     }
 }
