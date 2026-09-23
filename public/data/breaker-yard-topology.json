@@ -1,0 +1,22 @@
+{
+  "footprint_m": [550, 420],
+  "nodes": ["start", "fork", "jump_ramp", "stacked_scrap", "shed_maze", "crusher_yard", "scale_west", "scale_north", "magnet_alley", "gantry", "bridge_west", "bridge_east", "county_gate", "exit"],
+  "edges": [
+    ["start", "fork", "open"],
+    ["fork", "jump_ramp", "open"],
+    ["jump_ramp", "stacked_scrap", "jump"],
+    ["stacked_scrap", "scale_north", "open"],
+    ["fork", "shed_maze", "destruction"],
+    ["shed_maze", "scale_west", "destruction"],
+    ["fork", "crusher_yard", "open"],
+    ["crusher_yard", "magnet_alley", "powerup"],
+    ["scale_west", "scale_north", "open"],
+    ["scale_west", "magnet_alley", "open"],
+    ["scale_north", "gantry", "open"],
+    ["magnet_alley", "gantry", "open"],
+    ["gantry", "bridge_west", "supports"],
+    ["bridge_west", "bridge_east", "bridge"],
+    ["bridge_east", "county_gate", "nitro"],
+    ["county_gate", "exit", "open"]
+  ]
+}
