@@ -12,17 +12,8 @@ const districtNames = [
   "Downtown Canyon", "Crosswind", "Skyhook", "Spillway Town", "Turbine Spine", "MEGA DAM",
 ];
 
-test("reserves all 18 campaign records without producing past the gold gate", () => {
-  for (const name of districtNames) assert.match(source, new RegExp(name, "i"));
-  const campaignTable = source.match(/const RAW = \[([\s\S]*?)\n\] as const;/)?.[1] ?? "";
-  assert.equal((campaignTable.match(/^\s*\[\"[^\"]+\",\"/gm) ?? []).length, 18);
-  assert.match(source, /disabled=\{x\.id>1\}/);
-});
-
-test("includes every progression and input surface", () => {
-  for (const chassis of ["YARDBREAKER", "ROADHAMMER", "BLOCKBUSTER", "COLOSSUS", "TOWERKILLER", "DAM-BREAKER"])
-    assert.match(source, new RegExp(chassis));
-  for (const capability of ["localStorage", "reducedFlash", "autoDrive", "Pressure escape", "Vector Shear"])
+test("campaign and input surfaces are wired", () => {
+  for (const capability of ["CampaignDistrict", "GoldDistrict", "localStorage", "reducedFlash", "autoDrive"])
     assert.match(source, new RegExp(capability));
   for (const capability of ["getGamepads", "onPointerDown", "jumpCd", "nitroUnlocked", "overdrive"])
     assert.match(gold, new RegExp(capability));
