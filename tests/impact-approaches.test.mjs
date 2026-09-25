@@ -46,6 +46,30 @@ function hasImpactApproach(level,target,points,bridge){
   });
 }
 
+function drivenImpact(level,target,[startX,startY],bridge,deadBefore){
+  let x=startX,y=startY,speed=0,z=0,zv=0,jumped=false;
+  const heading=Math.atan2(target.y-y,target.x-x),boost=target.verb==='nitro';
+  const dt=1/60;
+  for(let tick=0;tick<180;tick++){
+    const onRoad=level.roads.some(r=>inside(x,y,r));
+    const max=(boost?480:310)*(onRoad?1:.73)*(1+level.classRank*.025);
+    speed=clamp((speed+(boost?340:200)*dt)*.996,-110,max);
+    if(target.verb==='jump'&&!jumped&&Math.hypot(x-target.x,y-target.y)<140){zv=250;jumped=true;}
+    if(jumped){zv-=530*dt;z=Math.max(0,z+zv*dt);if(z===0)zv=0;}
+    x=clamp(x+Math.cos(heading)*speed*dt,45,W-45);
+    y=clamp(y+Math.sin(heading)*speed*dt,45,H-45);
+    if(!open(level,x,y,bridge))return false;
+    const hit=level.targets.find(other=>!deadBefore.has(other.id)&&circleBox(x,y,z>30?23:39,targetBox(other)));
+    if(hit&&hit.id!==target.id)return false;
+    if(hit){
+      if(target.verb==='west'&&x>target.x-18)return false;
+      if(target.verb==='jump'&&z<25)return false;
+      return speed>=(target.kind==='light'?55:80);
+    }
+  }
+  return false;
+}
+
 test('every campaign objective has a reachable impact path with vehicle clearance',()=>{
   let count=0;
   for(const level of CAMPAIGN){
@@ -62,6 +86,35 @@ test('every campaign objective has a reachable impact path with vehicle clearanc
     }
     const finish=level.bridge?reachablePoints(level,true):opening;
     assert.ok(finish.some(([x,y])=>Math.hypot(x-level.exit.x,y-level.exit.y)<100),`${level.name}: extraction is unreachable`);
+  }
+  assert.equal(count,63);
+});
+
+test('every campaign objective admits a full-speed driven impact',()=>{
+  let count=0;
+  for(const level of CAMPAIGN){
+    const opening=reachablePoints(level,false);
+    const crossed=level.bridge?reachablePoints(level,true):opening;
+    const bridgeStage=level.beats.findIndex(beat=>beat.event==='bridge');
+    for(const target of level.targets){
+      const bridge=bridgeStage>=0&&target.stage>bridgeStage;
+      const points=bridge?crossed:opening;
+      const deadBefore=new Set();
+      for(let stage=0;stage<target.stage;stage++){
+        const beat=level.beats[stage];
+        for(const id of beat.targets.slice(0,beat.quota??beat.targets.length))deadBefore.add(id);
+      }
+      const beat=level.beats[target.stage],index=beat.targets.indexOf(target.id);
+      for(const id of beat.targets.slice(0,Math.min(index,(beat.quota??beat.targets.length)-1)))deadBefore.add(id);
+      const possible=points.some(point=>{
+        const distance=Math.hypot(point[0]-target.x,point[1]-target.y);
+        if(distance<120||distance>380)return false;
+        if(target.verb==='west'&&point[0]>=target.x-18)return false;
+        return drivenImpact(level,target,point,bridge,deadBefore);
+      });
+      assert.ok(possible,`${level.name}: ${target.id} cannot be struck at speed`);
+      count++;
+    }
   }
   assert.equal(count,63);
 });
