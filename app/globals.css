@@ -12,3 +12,4 @@
 @media(max-width:900px){.campaign-route{left:2%;top:80px;width:96%;height:46%}.campaign-route .route-stamp{display:none}}
 @media(max-width:560px){.campaign-route{height:43%}.campaign-route .node small{width:100px;white-space:normal;line-height:1.1}}
 .touch .brake{margin-left:auto;background:#263f49cc}.touch .brake+.jump{margin-left:0}
+.pause-menu{z-index:9}.pause-actions{display:flex;gap:12px;margin-top:24px}.pause-actions button{flex:1;min-height:50px;padding:12px;border:1px solid #626c70;background:#20272b;font-weight:800;cursor:pointer}.pause-actions .primary{width:auto}.pause:disabled{opacity:.45;cursor:not-allowed}
